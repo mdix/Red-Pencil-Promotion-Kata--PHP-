@@ -2,7 +2,7 @@
 
 class Article {
     private $charge;
-    private $reducedCharge;
+    private $currentCharge;
     private $reducedDate;
     private $isRedPencil = false;
     
@@ -15,12 +15,17 @@ class Article {
     }
 
     public function reduceCharge($amountToReduceInPercent) {
-        $this->isRedPencil = $this->setRedPencilState($amountToReduceInPercent);
-        $this->reducedCharge = $this->charge / 100 * (100 - $amountToReduceInPercent);
+        $this->isRedPencil   = $this->setRedPencilState($amountToReduceInPercent);
+        $this->currentCharge = $this->charge / 100 * (100 - $amountToReduceInPercent);
     }
     
-    public function getRedPencilCharge() {
-        return $this->reducedCharge;
+    public function increaseCharge($amountToIncreaseInPercent) {
+        $this->removeRedPencilState();
+        $this->currentCharge = $this->charge / 100 * (100 + $amountToIncreaseInPercent);
+    }
+    
+    public function getCurrentCharge() {
+        return $this->currentCharge;
     }
     
     public function isRedPencil() {
@@ -32,6 +37,11 @@ class Article {
             return true;
         }
         return false;
+    }
+    
+    private function removeRedPencilState() {
+        $this->isRedPencil = false;
+        $this->reducedDate = null;
     }
 }
 
