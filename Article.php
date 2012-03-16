@@ -4,10 +4,10 @@ class Article {
     private $currentCharge;
     private $chargeChanged;
     private $isRedPencil = false;
-    private $date;
+    private $timestamp;
     
-    public function __construct($charge, Date $date) {
-        $this->date = $date;
+    public function __construct($charge, Timestamp $date) {
+        $this->timestamp = $date;
         $this->originCharge = $charge;
         $this->currentCharge = $charge;
     }
@@ -19,13 +19,13 @@ class Article {
     public function reduceCharge($amountToReduceInPercent) {
         $this->isRedPencil   = $this->setRedPencilState($amountToReduceInPercent);
         $this->currentCharge = $this->currentCharge / 100 * (100 - $amountToReduceInPercent);
-        $this->chargeChanged = date("d.m.y",time());
+        $this->chargeChanged = time();
     }
     
     public function increaseCharge($amountToIncreaseInPercent) {
         $this->isRedPencil   = $this->setRedPencilState();
         $this->currentCharge = $this->currentCharge / 100 * (100 + $amountToIncreaseInPercent);
-        $this->chargeChanged = date("d.m.y",time());
+        $this->chargeChanged = time();
     }
     
     public function getCurrentCharge() {
@@ -41,7 +41,11 @@ class Article {
             return false;
         }
         // changed within the last 30 days?
-        
+        if (null !== $this->chargeChanged) {
+            if (($this->timestamp->getCurrentTimestamp() - $this->chargeChanged) / 86400 >= 30) {
+                return false;
+            }
+        }
         // reduced by min 5 but max 30 percent?
         if ($amountToReduceInPercent >= 5 && $amountToReduceInPercent <= 30) {
             return true;
