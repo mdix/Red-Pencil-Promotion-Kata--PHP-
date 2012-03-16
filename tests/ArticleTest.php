@@ -24,7 +24,7 @@ class ArticleTest extends PHPUnit_Framework_TestCase {
         $this->assertEquals(95, $article->getCurrentCharge());
         
         $article->reduceCharge(10);
-        $this->assertEquals(90, $article->getCurrentCharge());
+        $this->assertEquals(85.5, $article->getCurrentCharge());
         unset($article);
         
         
@@ -33,10 +33,10 @@ class ArticleTest extends PHPUnit_Framework_TestCase {
         $this->assertEquals(134.928, $article->getCurrentCharge());
         
         $article->reduceCharge(11.2);
-        $this->assertEquals(133.12896, $article->getCurrentCharge());
+        $this->assertEquals(119.816064, $article->getCurrentCharge());
         
         $article->reduceCharge(45);
-        $this->assertEquals(82.456, $article->getCurrentCharge());
+        $this->assertEquals(65.8988352, $article->getCurrentCharge());
         unset($article);
         
         
@@ -48,17 +48,33 @@ class ArticleTest extends PHPUnit_Framework_TestCase {
         $this->assertEquals(0, $article->getCurrentCharge());        
 
         $article->reduceCharge(63.65);
-        $this->assertEquals(4.409255, $article->getCurrentCharge());   
+        $this->assertEquals(0, $article->getCurrentCharge());   
         unset($article);
     }
     
     public function testIncreaseChargeIncreasesCurrentChargeByGivenPercentValue() {
-        $article = new Article(100.00);
-        $article->increaseCharge(5);
-        $this->assertEquals(105, $article->getCurrentCharge());
+        $this->article = new Article(100.00);
+        $this->article->increaseCharge(5);
+        $this->assertEquals(105, $this->article->getCurrentCharge());
         
-        $article->increaseCharge(15);
-        $this->assertEquals(115, $article->getCurrentCharge());
+        $this->article->increaseCharge(15);
+        $this->assertEquals(120.75, $this->article->getCurrentCharge());
+        unset($this->article);
+    }
+    
+    public function testMultipleIncreaseAndDecreaseOperations() {
+        $this->article->increaseCharge(10);
+        $this->assertEquals(110, $this->article->getCurrentCharge());
+        $this->article->increaseCharge(5);
+        $this->assertEquals(115.5, $this->article->getCurrentCharge());
+        $this->article->reduceCharge(8);
+        $this->assertEquals(106.26, $this->article->getCurrentCharge());
+        $this->article->increaseCharge(2);
+        $this->assertEquals(108.3852, $this->article->getCurrentCharge());
+        $this->article->increaseCharge(18);
+        $this->assertEquals(127.894536, $this->article->getCurrentCharge());
+        $this->article->reduceCharge(22);
+        $this->assertEquals(99.75773808, $this->article->getCurrentCharge());
     }
     
     public function testredPencilStateIsFalseWhenChargeIsReducedByLessThan5Percent() {

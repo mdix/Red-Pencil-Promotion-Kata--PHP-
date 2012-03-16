@@ -1,27 +1,28 @@
 <?php
 
 class Article {
-    private $charge;
+    private $originCharge;
     private $currentCharge;
-    private $reducedDate;
+    private $chargeChanged;
     private $isRedPencil = false;
     
     public function __construct($charge) {
-        $this->charge = $charge;
+        $this->originCharge = $charge;
+        $this->currentCharge = $charge;
     }
     
     public function getOriginCharge() {
-        return $this->charge;
+        return $this->originCharge;
     }
 
     public function reduceCharge($amountToReduceInPercent) {
         $this->isRedPencil   = $this->setRedPencilState($amountToReduceInPercent);
-        $this->currentCharge = $this->charge / 100 * (100 - $amountToReduceInPercent);
+        $this->currentCharge = $this->currentCharge / 100 * (100 - $amountToReduceInPercent);
     }
     
     public function increaseCharge($amountToIncreaseInPercent) {
-        $this->removeRedPencilState();
-        $this->currentCharge = $this->charge / 100 * (100 + $amountToIncreaseInPercent);
+        $this->isRedPencil   = $this->setRedPencilState();
+        $this->currentCharge = $this->currentCharge / 100 * (100 + $amountToIncreaseInPercent);
     }
     
     public function getCurrentCharge() {
@@ -32,16 +33,17 @@ class Article {
         return $this->isRedPencil;
     }
     
-    private function setRedPencilState($amountToReduceInPercent) {
+    private function setRedPencilState($amountToReduceInPercent = null) {
+        if (null == $amountToReduceInPercent) {
+            return false;
+        }
+        // changed within the last 30 days?
+        
+        // reduced by min 5 but max 30 percent?
         if ($amountToReduceInPercent >= 5 && $amountToReduceInPercent <= 30) {
             return true;
         }
         return false;
-    }
-    
-    private function removeRedPencilState() {
-        $this->isRedPencil = false;
-        $this->reducedDate = null;
     }
 }
 
