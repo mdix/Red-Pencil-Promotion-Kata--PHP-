@@ -1,17 +1,35 @@
 <?php
 require_once dirname(__FILE__) . '/../Article.php';
 
+date_default_timezone_set ('Europe/Berlin');
+class Date {
+    private $date;
+    
+    public function __construct() {
+        $this->date = date('m.d.y');
+    }
+    
+    public function getCurrentDate() {
+        return $this->date;
+    }
+    
+    public function addDaysToCurrentDate($days) {
+        $this->date = date ('d.m.y' , strtotime('+' . $days . ' days'));
+    }
+}
+
 class ArticleTest extends PHPUnit_Framework_TestCase {
 
     protected $article;
     protected $charge = 100.00;
     
     protected function setUp() {
-        $this->article = new Article($this->charge);
+        $this->article = new Article($this->charge, new Date());
+        date_default_timezone_set ('Europe/Berlin');
     }
 
     protected function tearDown() {
-        
+
     }
 
     public function testChargeIsValuePassedToConstructor() {
@@ -19,7 +37,7 @@ class ArticleTest extends PHPUnit_Framework_TestCase {
     }
     
     public function testRedPencilReductionReducesCurrentChargeByGivenValue() {
-        $article = new Article(100.00);
+        $article = new Article(100.00, new Date());
         $article->reduceCharge(5);
         $this->assertEquals(95, $article->getCurrentCharge());
         
@@ -28,7 +46,7 @@ class ArticleTest extends PHPUnit_Framework_TestCase {
         unset($article);
         
         
-        $article = new Article(149.92);
+        $article = new Article(149.92, new Date());
         $article->reduceCharge(10);
         $this->assertEquals(134.928, $article->getCurrentCharge());
         
@@ -40,7 +58,7 @@ class ArticleTest extends PHPUnit_Framework_TestCase {
         unset($article);
         
         
-        $article = new Article(12.13);
+        $article = new Article(12.13, new Date());
         $article->reduceCharge(19);
         $this->assertEquals(9.8253, $article->getCurrentCharge());
 
@@ -53,7 +71,7 @@ class ArticleTest extends PHPUnit_Framework_TestCase {
     }
     
     public function testIncreaseChargeIncreasesCurrentChargeByGivenPercentValue() {
-        $this->article = new Article(100.00);
+        $this->article = new Article(100.00, new Date());
         $this->article->increaseCharge(5);
         $this->assertEquals(105, $this->article->getCurrentCharge());
         
@@ -114,6 +132,13 @@ class ArticleTest extends PHPUnit_Framework_TestCase {
         $this->article->reduceCharge(10);
         $this->assertTrue($this->article->isRedPencil());
         $this->article->increaseCharge(15.3);
+        $this->assertFalse($this->article->isRedPencil());
+    }
+    
+    public function testPriceWasNotStableFor30DaysArticleShouldntBeRedPencil() {
+        $this->article->increaseCharge(1);
+        // set current date
+        $this->article->reduceCharge(20);
         $this->assertFalse($this->article->isRedPencil());
     }
     
