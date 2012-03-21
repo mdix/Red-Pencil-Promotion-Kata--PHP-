@@ -6,8 +6,8 @@ class Article {
     private $isRedPencil = false;
     private $timestamp;
     
-    public function __construct($charge, Timestamp $date) {
-        $this->timestamp = $date;
+    public function __construct($charge, Timestamp &$timestamp) {
+        $this->timestamp = $timestamp;
         $this->originCharge = $charge;
         $this->currentCharge = $charge;
     }
@@ -32,6 +32,7 @@ class Article {
         return $this->currentCharge;
     }
     
+    // Thought: Why a state? Should check when needed with a method similar to setRedPencilState().
     public function isRedPencil() {
         return $this->isRedPencil;
     }
@@ -42,7 +43,7 @@ class Article {
         }
         // changed within the last 30 days?
         if (null !== $this->chargeChanged) {
-            if (($this->timestamp->getCurrentTimestamp() - $this->chargeChanged) / 86400 >= 30) {
+            if (($this->timestamp->getCurrentTimestamp() - $this->chargeChanged) / 86400 < 30) {
                 return false;
             }
         }

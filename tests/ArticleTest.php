@@ -15,7 +15,7 @@ class Timestamp {
     
     public function addDaysToCurrentTimestamp($days) {
         $daysAsSeconds = $days * 86400;
-        $this->timestamp = time() + $daysAsSeconds;
+        $this->timestamp = $this->timestamp + $daysAsSeconds;
     }
 }
 
@@ -26,7 +26,6 @@ class ArticleTest extends PHPUnit_Framework_TestCase {
     
     protected function setUp() {
         $this->article = new Article($this->charge, new Timestamp());
-        date_default_timezone_set ('Europe/Berlin');
     }
 
     protected function tearDown() {
@@ -108,6 +107,8 @@ class ArticleTest extends PHPUnit_Framework_TestCase {
         $this->article->reduceCharge(5);
         $this->assertTrue($this->article->isRedPencil());
         
+        /* Tests won't work due to changed requirements (price wasn't stable for at least 30 days 
+         * between changes
         $this->article->reduceCharge(20);
         $this->assertTrue($this->article->isRedPencil());
         
@@ -116,6 +117,7 @@ class ArticleTest extends PHPUnit_Framework_TestCase {
         
         $this->article->reduceCharge(26.7);
         $this->assertTrue($this->article->isRedPencil());
+        */
     }
     
     public function testredPencilStateIsFalseWhenChargeIsReducedByMoreThan30Percent() {
@@ -136,16 +138,25 @@ class ArticleTest extends PHPUnit_Framework_TestCase {
         $this->assertFalse($this->article->isRedPencil());
     }
     
-    public function testPriceWasNotStableFor30DaysArticleShouldntBeRedPencil() {
+    public function testPriceWasStableFor30DaysArticleShouldBeRedPencil() {
         $timestamp = new Timestamp();
-        $timestamp->addDaysToCurrentTimestamp(40);
         $article = new Article(100.00, $timestamp);
         
-        $article->increaseCharge(1);
+        $article->increaseCharge(3);
+        $timestamp->addDaysToCurrentTimestamp(30);
+        $article->reduceCharge(20);
+        $this->assertTrue($article->isRedPencil());
+    }
+    
+    public function testPriceWasntStableFor30DaysArticleShouldntBeRedPencil() {
+        $timestamp = new Timestamp();
+        $article = new Article(100.00, $timestamp);
+        
+        $article->increaseCharge(3);
+        $timestamp->addDaysToCurrentTimestamp(29);
         $article->reduceCharge(20);
         $this->assertFalse($article->isRedPencil());
     }
-    
 }
 
 ?>
