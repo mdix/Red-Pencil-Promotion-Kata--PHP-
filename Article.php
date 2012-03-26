@@ -41,27 +41,53 @@ class Article {
         if (null == $amountToReduceInPercent) {
             return false;
         }
-        // changed within the last 30 days?
-        if (null !== $this->chargeChanged) {
-            if (($this->timestamp->getCurrentTimestamp() - $this->chargeChanged) / 86400 < 30) {
-                return false;
-            }
+ 
+        if ($this->chargeNotStableFor30Days()) {
+            return false;
         }
         
-        // check overall reduction here
-        if ($this->getOverallReductionInPercent($this->originCharge, $this->currentCharge) < -30) {
+        if ($this->overallReductionHigherThan30Percent()) {
             return false;
         }
 
-        // reduced by min 5 but max 30 percent?
-        if ($amountToReduceInPercent >= 5 && $amountToReduceInPercent <= 30) {
+        if ($this->reductionLowerThan5Percent($amountToReduceInPercent) || $this->reductionHigherThan30Percent($amountToReduceInPercent)) {
+            return false;
+        }
+        return true;
+    }
+    
+    private function getOverallReductionInPercent($charge1, $charge2) {
+        return ($charge2 * 100) / $charge1 - 100;
+    }
+    
+    private function chargeNotStableFor30Days() {
+        if (null !== $this->chargeChanged) {
+            if (($this->timestamp->getCurrentTimestamp() - $this->chargeChanged) / 86400 < 30) {
+                return true;
+            }
+        }
+        return false;
+    }
+    
+    private function overallReductionHigherThan30Percent() {
+        if ($this->getOverallReductionInPercent($this->originCharge, $this->currentCharge) < -30) {
             return true;
         }
         return false;
     }
     
-    private function getOverallReductionInPercent($charge1, $charge2) {
-        return ($charge2 * 100) / $charge1 - 100;
+    private function reductionHigherThan30Percent($amountToReduceInPercent) {
+        if ($amountToReduceInPercent <= 30) {
+            return false;
+        }
+        return true;
+    }
+    
+    private function reductionLowerThan5Percent($amountToReduceInPercent) {
+        if ($amountToReduceInPercent >= 5) {
+            return false;
+        }
+        return true;
     }
 }
 
