@@ -167,6 +167,16 @@ class ArticleTest extends PHPUnit_Framework_TestCase {
         $article->reduceCharge(29);
         $this->assertFalse($article->isRedPencil());
     }
+    
+    public function testRedPencilEndsAfterThirtyDays() {
+        $timestamp = new Timestamp();
+        $article = new Article(200.00, $timestamp);
+        
+        $article->reduceCharge(10);
+        $this->assertTrue($article->isRedPencil());
+        $timestamp->addDaysToCurrentTimestamp(30);
+        $this->assertFalse($article->isRedPencil());
+    }
 }
 
 ?>
